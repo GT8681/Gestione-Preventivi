@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Form, Row, Col, Button, Table, Badge } from 'react-bootstrap';
 
+
 const CreazionePreventivo = () => {
     // 1. Dati Cliente e Cantiere
     const [cliente, setCliente] = useState({
