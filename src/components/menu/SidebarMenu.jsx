@@ -3,6 +3,7 @@ import { Button, Offcanvas, Nav } from 'react-bootstrap';
 
 const SidebarMenu = ({ paginaAttiva, onSelezionaPagina }) => {
     const [mostra, setMostra] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
 
     const apriMenu = () => setMostra(true);
     const chiudiMenu = () => setMostra(false);
@@ -14,62 +15,95 @@ const SidebarMenu = ({ paginaAttiva, onSelezionaPagina }) => {
 
     return (
         <>
-            {/* LINGUETTA SUL BORDO SINISTRO */}
+            {/* LINGUETTA PREMIUM ED ELEGANTE A SINISTRA */}
             <div
                 onClick={apriMenu}
-                className="print-hide d-flex align-items-center justify-content-center"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                className="print-hide d-flex align-items-center justify-content-center gap-2"
                 style={{
                     position: 'fixed',
                     top: '50%',
-                    left: '0px', // <-- Spostato a sinistra
+                    left: '0px',
                     transform: 'translateY(-50%)',
-                    width: '24px',
-                    height: '65px',
-                    backgroundColor: '#198754', // Verde Bolnet
+                    width: isHovered ? '95px' : '38px', // Si espande fluidamente al passaggio del mouse
+                    height: '52px',
+                    backgroundColor: 'rgba(25, 135, 84, 0.85)', // Verde Bolnet trasparente
+                    backdropFilter: 'blur(8px)', // Effetto vetro sfuocato
+                    WebkitBackdropFilter: 'blur(8px)',
                     color: '#ffffff',
-                    borderTopRightRadius: '10px', // Rounded a destra
-                    borderBottomRightRadius: '10px',
+                    borderTopRightRadius: '12px',
+                    borderBottomRightRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderLeft: 'none',
                     cursor: 'pointer',
                     zIndex: 1040,
-                    opacity: 0.8,
-                    boxShadow: '2px 0 8px rgba(0,0,0,0.25)',
-                    transition: 'all 0.2s ease-in-out'
+                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.15)',
+                    transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                    overflow: 'hidden',
+                    paddingLeft: '8px'
                 }}
-                title="Apri Menu"
+                title="Apri Menu Navigazione"
             >
-                <span style={{ fontSize: '12px' }}>▶</span> {/* Freccia verso destra */}
+                {/* ICONA MENU HAMBURGER / FRECCIA */}
+                <span style={{ fontSize: '16px', lineHeight: 1 }} className="fw-bold">
+                    ☰
+                </span>
+
+                {/* TESTO ESPLICATIVO (Compare solo se allarghi la linguetta) */}
+                <span 
+                    className="fw-semibold text-uppercase"
+                    style={{ 
+                        fontSize: '11px', 
+                        letterSpacing: '1px',
+                        whiteSpace: 'nowrap',
+                        opacity: isHovered ? 1 : 0,
+                        transition: 'opacity 0.2s ease-in-out'
+                    }}
+                >
+                    Menu
+                </span>
             </div>
 
-            {/* PANNELLO MENU CHE COMPARE DA SINISTRA */}
+            {/* PANNELLO LATERALMENTE A SCOMPARSA (OFFCANVAS) */}
             <Offcanvas 
                 show={mostra} 
                 onHide={chiudiMenu} 
-                placement="start" // <-- Comparsa da sinistra
+                placement="start"
                 className="bg-dark text-white print-hide"
+                style={{ backdropFilter: 'blur(10px)' }}
             >
-                <Offcanvas.Header closeButton closeVariant="white" className="border-bottom border-secondary">
-                    <Offcanvas.Title className="fw-bold text-success">
-                        ⚙️ Menu Bolnet
+                <Offcanvas.Header closeButton closeVariant="white" className="border-bottom border-secondary pb-3">
+                    <Offcanvas.Title className="fw-bold text-success d-flex align-items-center gap-2">
+                        <span className="fs-4">⚙️</span> BOLNET NAVIGAZIONE
                     </Offcanvas.Title>
                 </Offcanvas.Header>
-                <Offcanvas.Body className="p-4">
-                    <p className="text-secondary small fw-semibold mb-3">NAVIGAZIONE</p>
-                    <Nav className="flex-column gap-2">
-                        <Button 
-                            variant={paginaAttiva === 'preventivatore' ? 'success' : 'outline-light'} 
-                            onClick={() => gestisciSelezione('preventivatore')}
-                            className="text-start py-3 fw-bold d-flex align-items-center gap-2"
-                        >
-                            📊 Preventivatore Cantiere
-                        </Button>
-                        <Button 
-                            variant={paginaAttiva === 'depliant' ? 'success' : 'outline-light'} 
-                            onClick={() => gestisciSelezione('depliant')}
-                            className="text-start py-3 fw-bold d-flex align-items-center gap-2"
-                        >
-                            📄 Dépliant Promozionale
-                        </Button>
-                    </Nav>
+                <Offcanvas.Body className="p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <p className="text-secondary small fw-bold tracking-wider mb-3">SELEZIONA STRUMENTO</p>
+                        <Nav className="flex-column gap-3">
+                            <Button 
+                                variant={paginaAttiva === 'preventivatore' ? 'success' : 'outline-light'} 
+                                onClick={() => gestisciSelezione('preventivatore')}
+                                className="text-start py-3 px-3 fw-bold d-flex align-items-center gap-3 border-0 shadow-sm"
+                                style={{ borderRadius: '10px' }}
+                            >
+                                <span className="fs-5">📊</span> Preventivatore Cantiere
+                            </Button>
+                            <Button 
+                                variant={paginaAttiva === 'depliant' ? 'success' : 'outline-light'} 
+                                onClick={() => gestisciSelezione('depliant')}
+                                className="text-start py-3 px-3 fw-bold d-flex align-items-center gap-3 border-0 shadow-sm"
+                                style={{ borderRadius: '10px' }}
+                            >
+                                <span className="fs-5">📄</span> Dépliant Promozionale
+                            </Button>
+                        </Nav>
+                    </div>
+
+                    <div className="pt-3 border-top border-secondary text-center text-muted small">
+                        <small>Bolnet Servizi Integrati © 2026</small>
+                    </div>
                 </Offcanvas.Body>
             </Offcanvas>
         </>
