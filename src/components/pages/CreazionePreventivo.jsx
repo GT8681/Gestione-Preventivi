@@ -14,13 +14,13 @@ const CreazionePreventivo = () => {
 
     // 2. Conteggio Infissi e Serramenti
     const [conteggioElementi, setConteggioElementi] = useState({
-        finestre: 4,
-        porteFinestre: 2,
-        tapparellePersiane: true,
-        porteInterne: 5,
-        zanzariere: 6,
-        inferriate: 4,
-        tendeDaSole: 2
+        finestre: 0,
+        porteFinestre: 0,
+        tapparellePersiane: false,
+        porteInterne: 0,
+        zanzariere: 0,
+        inferriate: 0,
+        tendeDaSole: 0
     });
 
     // 3. Squadra e Tariffa
@@ -29,28 +29,56 @@ const CreazionePreventivo = () => {
         costoOrarioOperatore: 25.0
     });
 
-    // 4. CAMPI ORE DEDICATI (INFISSI E MONOSPAZZOLA)
+    // 4. CAMPI ORE DEDICATI
     const [oreStimate, setOreStimate] = useState({
-        oreInfissiEProtezioni: 2.5, // Ore manuali per le finestre
-        orePavimenti: 2.0           // Ore per la monospazzola
+        oreInfissiEProtezioni: 0,
+        orePavimenti: 0
     });
 
-    // 5. Pavimenti e Superfici (m²) - Monospazzola
-    const [lavorazioniMq, setLavorazioniMq] = useState([
-        { id: 1, zona: 'Zona Giorno / Post-Cantiere', tipoPavimento: 'Gres Porcellanato', mq: 80, servizio: 'Monospazzola + Aspiraliquidi' },
-        { id: 2, zona: 'Taverna', tipoPavimento: 'Cotto / Ceramica', mq: 25, servizio: 'Monospazzola + Aspiraliquidi' },
-        { id: 3, zona: 'Balconi Esterni', tipoPavimento: 'Klinker / Esterno', mq: 15, servizio: 'Lavaggio Sgrosso Esterno' }
-    ]);
+    // 5. Pavimenti e Superfici (m²)
+    const [lavorazioniMq, setLavorazioniMq] = useState([]);
 
     // 6. Lavori Extra Manuali
-    const [lavorazioniExtra, setLavorazioniExtra] = useState([
-        { id: 1, descrizione: 'Igienizzazione e decalcificazione 2 Bagni', ore: 1.5 },
-        { id: 2, descrizione: 'Trattamento e pulizia Scala in Legno', ore: 1.0 }
-    ]);
+    const [lavorazioniExtra, setLavorazioniExtra] = useState([]);
 
     // Form Aggiunte
     const [nuovaZona, setNuovaZona] = useState({ zona: '', tipoPavimento: 'Gres Porcellanato', mq: '', servizio: 'Monospazzola + Aspiraliquidi' });
     const [nuovoExtra, setNuovoExtra] = useState({ descrizione: '', ore: '' });
+
+    // FUNZIONE PER RESETTARE TUTTI I CAMPI
+    const resettaTutto = () => {
+        if (window.confirm("Sei sicuro di voler azzerare tutti i dati del preventivo?")) {
+            setCliente({
+                nome: '',
+                indirizzo: '',
+                telefono: '',
+                email: '',
+                data: new Date().toLocaleDateString('it-IT'),
+                numeroPreventivo: `PREV-${Math.floor(1000 + Math.random() * 9000)}`
+            });
+            setConteggioElementi({
+                finestre: 0,
+                porteFinestre: 0,
+                tapparellePersiane: false,
+                porteInterne: 0,
+                zanzariere: 0,
+                inferriate: 0,
+                tendeDaSole: 0
+            });
+            setSquadra({
+                operatori: 2,
+                costoOrarioOperatore: 25.0
+            });
+            setOreStimate({
+                oreInfissiEProtezioni: 0,
+                orePavimenti: 0
+            });
+            setLavorazioniMq([]);
+            setLavorazioniExtra([]);
+            setNuovaZona({ zona: '', tipoPavimento: 'Gres Porcellanato', mq: '', servizio: 'Monospazzola + Aspiraliquidi' });
+            setNuovoExtra({ descrizione: '', ore: '' });
+        }
+    };
 
     // Handlers
     const aggiornaContatore = (campo, delta) => setConteggioElementi(prev => ({ ...prev, [campo]: Math.max(0, prev[campo] + delta) }));
@@ -76,10 +104,14 @@ const CreazionePreventivo = () => {
 
     // Suggerimento automatico ore Monospazzola
     useEffect(() => {
-        const resaMqOraPerPersona = 35;
-        const oreTotaliLavoroDovute = totaleMq / resaMqOraPerPersona;
-        const tempoOrologioStimato = Math.max(0.5, (oreTotaliLavoroDovute / squadra.operatori));
-        setOreStimate(prev => ({ ...prev, orePavimenti: Math.round(tempoOrologioStimato * 2) / 2 }));
+        if (totaleMq > 0) {
+            const resaMqOraPerPersona = 35;
+            const oreTotaliLavoroDovute = totaleMq / resaMqOraPerPersona;
+            const tempoOrologioStimato = Math.max(0.5, (oreTotaliLavoroDovute / squadra.operatori));
+            setOreStimate(prev => ({ ...prev, orePavimenti: Math.round(tempoOrologioStimato * 2) / 2 }));
+        } else {
+            setOreStimate(prev => ({ ...prev, orePavimenti: 0 }));
+        }
     }, [totaleMq, squadra.operatori]);
 
     // CALCOLI FINALI ORE
@@ -93,7 +125,7 @@ const CreazionePreventivo = () => {
         <div className="bg-light min-vh-100 py-4 font-sans-serif">
             <Container style={{ maxWidth: '920px' }}>
 
-                {/* HEADER AZIENDALE */}
+                {/* HEADER AZIENDALE CON PULSANTE RESET */}
                 <Card className="border-0 shadow-sm rounded-3 mb-4 overflow-hidden">
                     <div className="bg-dark text-white p-4 d-flex justify-content-between align-items-center">
                         <div>
@@ -101,7 +133,17 @@ const CreazionePreventivo = () => {
                             <small className="text-muted fw-semibold">Pulizie Speciali & Trattamenti Post-Cantiere</small>
                         </div>
                         <div className="text-end">
-                            <Badge bg="success" className="px-3 py-2 fs-6 fw-normal mb-2 d-inline-block">Preventivo Ufficiale</Badge>
+                            <div className="d-flex align-items-center gap-2 mb-2 justify-content-end">
+                                <Badge bg="success" className="px-3 py-2 fs-6 fw-normal d-inline-block">Preventivo Ufficiale</Badge>
+                                <Button 
+                                    variant="outline-danger" 
+                                    size="sm" 
+                                    className="print-hide fw-bold text-white border-white-50"
+                                    onClick={resettaTutto}
+                                >
+                                    🔄 Azzera Tutto
+                                </Button>
+                            </div>
                             <div className="text-muted small">N° {cliente.numeroPreventivo} | Data: {cliente.data}</div>
                         </div>
                     </div>
@@ -140,7 +182,7 @@ const CreazionePreventivo = () => {
                     </Card.Body>
                 </Card>
 
-                {/* SEZIONE 1: INFISSI E SERRAMENTI + CAMPO ORE DEDICATO */}
+                {/* SEZIONE 1: INFISSI E SERRAMENTI */}
                 <Card className="border-0 shadow-sm rounded-3 mb-4">
                     <Card.Body className="p-4">
                         <h6 className="text-uppercase text-secondary fw-bold mb-3 small tracking-wide">🪟 Conteggio Infissi & Protezioni</h6>
@@ -181,7 +223,6 @@ const CreazionePreventivo = () => {
                             />
                         </div>
 
-                        {/* CAMPO ORE FINESTRE/INFISSI */}
                         <div className="p-3 bg-white rounded-3 border border-info">
                             <Form.Group>
                                 <Form.Label className="fw-bold text-dark small mb-1">⏱️ Ore Stimate per Pulizia Finestre & Infissi:</Form.Label>
@@ -196,7 +237,7 @@ const CreazionePreventivo = () => {
                     </Card.Body>
                 </Card>
 
-                {/* SEZIONE 2: PAVIMENTI, MONOSPAZZOLA + CAMPO ORE MONOSPAZZOLA */}
+                {/* SEZIONE 2: PAVIMENTI, MONOSPAZZOLA */}
                 <Card className="border-0 shadow-sm rounded-3 mb-4">
                     <Card.Body className="p-4">
                         <div className="d-flex justify-content-between align-items-center mb-3">
@@ -204,12 +245,11 @@ const CreazionePreventivo = () => {
                             <Badge bg="dark" className="px-3 py-2 fw-normal">{totaleMq} m² Totali</Badge>
                         </div>
 
-                        {/* Form aggiunta M² */}
                         <Row className="g-2 mb-3 print-hide">
                             <Col md={3}>
                                 <Form.Control 
                                     size="sm" 
-                                    placeholder="Ambiente (Es. Zona Giorno)" 
+                                    placeholder="Ambiente (Es. Salone)" 
                                     value={nuovaZona.zona} 
                                     onChange={e => setNuovaZona({...nuovaZona, zona: e.target.value})} 
                                 />
@@ -252,32 +292,35 @@ const CreazionePreventivo = () => {
                             </Col>
                         </Row>
 
-                        <Table hover responsive size="sm" className="align-middle border mb-3">
-                            <thead className="bg-light">
-                                <tr className="text-secondary small">
-                                    <th>Ambiente</th>
-                                    <th>Materiale</th>
-                                    <th>Lavorazione</th>
-                                    <th>Superficie</th>
-                                    <th className="text-end print-hide"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {lavorazioniMq.map(item => (
-                                    <tr key={item.id}>
-                                        <td className="fw-semibold text-dark">{item.zona}</td>
-                                        <td><span className="badge bg-secondary bg-opacity-10 text-dark fw-normal">{item.tipoPavimento}</span></td>
-                                        <td className="text-success fw-semibold small">{item.servizio}</td>
-                                        <td className="fw-bold">{item.mq} m²</td>
-                                        <td className="text-end print-hide">
-                                            <Button variant="link" className="text-danger p-0 border-0 fw-bold" onClick={() => rimuoviZona(item.id)}>✕</Button>
-                                        </td>
+                        {lavorazioniMq.length > 0 ? (
+                            <Table hover responsive size="sm" className="align-middle border mb-3">
+                                <thead className="bg-light">
+                                    <tr className="text-secondary small">
+                                        <th>Ambiente</th>
+                                        <th>Materiale</th>
+                                        <th>Lavorazione</th>
+                                        <th>Superficie</th>
+                                        <th className="text-end print-hide"></th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </Table>
+                                </thead>
+                                <tbody>
+                                    {lavorazioniMq.map(item => (
+                                        <tr key={item.id}>
+                                            <td className="fw-semibold text-dark">{item.zona}</td>
+                                            <td><span className="badge bg-secondary bg-opacity-10 text-dark fw-normal">{item.tipoPavimento}</span></td>
+                                            <td className="text-success fw-semibold small">{item.servizio}</td>
+                                            <td className="fw-bold">{item.mq} m²</td>
+                                            <td className="text-end print-hide">
+                                                <Button variant="link" className="text-danger p-0 border-0 fw-bold" onClick={() => rimuoviZona(item.id)}>✕</Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </Table>
+                        ) : (
+                            <div className="text-center p-3 text-muted border border-dashed rounded mb-3 small">Nessuna superficie inserita. Aggiungi gli ambienti qui sopra.</div>
+                        )}
 
-                        {/* CAMPO ORE MONOSPAZZOLA */}
                         <div className="p-3 bg-white rounded-3 border border-primary">
                             <Form.Group>
                                 <Form.Label className="fw-bold text-dark small mb-1">⏱️ Ore Stimate per Monospazzola & Pavimenti:</Form.Label>
@@ -287,7 +330,6 @@ const CreazionePreventivo = () => {
                                     value={oreStimate.orePavimenti}
                                     onChange={e => setOreStimate({...oreStimate, orePavimenti: parseFloat(e.target.value) || 0})}
                                 />
-                                <small className="text-muted">Calcolate in automatico in base ai m² totali, ma puoi modificarle a piacimento.</small>
                             </Form.Group>
                         </div>
                     </Card.Body>
@@ -325,26 +367,30 @@ const CreazionePreventivo = () => {
                             </Col>
                         </Row>
 
-                        <Table hover responsive size="sm" className="align-middle border mb-0">
-                            <thead className="bg-light">
-                                <tr className="text-secondary small">
-                                    <th>Descrizione Intervento Extra</th>
-                                    <th>Tempo Stimato</th>
-                                    <th className="text-end print-hide"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {lavorazioniExtra.map(item => (
-                                    <tr key={item.id}>
-                                        <td className="fw-semibold text-dark">{item.descrizione}</td>
-                                        <td className="fw-bold">{item.ore} ore</td>
-                                        <td className="text-end print-hide">
-                                            <Button variant="link" className="text-danger p-0 border-0 fw-bold" onClick={() => rimuoviExtra(item.id)}>✕</Button>
-                                        </td>
+                        {lavorazioniExtra.length > 0 ? (
+                            <Table hover responsive size="sm" className="align-middle border mb-0">
+                                <thead className="bg-light">
+                                    <tr className="text-secondary small">
+                                        <th>Descrizione Intervento Extra</th>
+                                        <th>Tempo Stimato</th>
+                                        <th className="text-end print-hide"></th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </Table>
+                                </thead>
+                                <tbody>
+                                    {lavorazioniExtra.map(item => (
+                                        <tr key={item.id}>
+                                            <td className="fw-semibold text-dark">{item.descrizione}</td>
+                                            <td className="fw-bold">{item.ore} ore</td>
+                                            <td className="text-end print-hide">
+                                                <Button variant="link" className="text-danger p-0 border-0 fw-bold" onClick={() => rimuoviExtra(item.id)}>✕</Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </Table>
+                        ) : (
+                            <div className="text-center p-3 text-muted border border-dashed rounded small">Nessun lavoro extra inserito.</div>
+                        )}
                     </Card.Body>
                 </Card>
 
