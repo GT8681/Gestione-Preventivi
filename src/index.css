@@ -1,0 +1,35 @@
+@media print {
+    /* Nasconde tutti i bottoni e i campi non necessari durante la stampa */
+    .print-hide, 
+    button, 
+    .btn, 
+    input[type="number"],
+    select {
+      display: none !important;
+    }
+  
+    /* Mostra gli elementi riservati al foglio stampato */
+    .print-only {
+      display: block !important;
+    }
+  
+    /* Rimuove gli sfondi grigi e adatta il foglio in A4 */
+    body, .bg-light {
+      background-color: #ffffff !important;
+    }
+  
+    .card {
+      border: 1px solid #ddd !important;
+      box-shadow: none !important;
+      page-break-inside: avoid;
+    }
+  
+    /* Rende i campi di input simili a testo normale nel PDF */
+    input, select {
+      border: none !important;
+      background: transparent !important;
+      padding: 0 !important;
+      font-weight: bold;
+    }
+  }
+  
