@@ -66,8 +66,8 @@ const CreazionePreventivo = () => {
                 tendeDaSole: 0
             });
             setSquadra({
-                operatori: 2,
-                costoOrarioOperatore: 25.0
+                operatori: 1,
+                costoOrarioOperatore: 20
             });
             setOreStimate({
                 oreInfissiEProtezioni: 0,
